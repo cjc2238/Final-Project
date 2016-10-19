@@ -14,4 +14,5 @@ std_registration_df <- read.csv("studentRegistration.csv")
 std_vle_df <- read.csv("studentVle.csv")
 vle_df <- read.csv("vle.csv")
 
+setwd("~/GitHub/Final-Project/Data Manipulation")
 
