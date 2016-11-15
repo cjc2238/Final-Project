@@ -17,6 +17,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(party)
+library(imputeTS)
 ```
 
 Load the orrigioal source files, in this case they are located within another directory on my PC.
@@ -27,13 +28,58 @@ source('~/GitHub/Final-Project/Data Manipulation/Load Data Frames from CSV Files
 
 We need to combine the data frames in order to process and extract the relevant click data. We need to take note that there are 7 differenct courses, each taught 4 seperate times. In order to build this deciscion tree we will first select one course and one semester, train and test this model using split validation, then use this trained model to score the 3 other iterations of the same course. The final results will be analysed and compared. 
 ```{r}
-click_df <- merge(std_vle_df, vle_df, by= c("id_site","code_presentation","code_module"))
+click_df <- merge(std_vle_df,
+                  vle_df,
+                  by= c("id_site","code_presentation","code_module"))
 ```
 
 Now that we've created a DF with all the click data, we must now select a specific course and specific term in which this course was presented. In this instance we will look at the course labeled "AAA" and presented during the 2013J term.  We will also only select the relevant columns in this data frame (id_student, date, sum_click, activity_type). 
 
 ```{r}
-click_df_2013j_aaa <- subset(click_df, code_module %in% "AAA" & code_presentation %in% "2013J", select = c(id_student, date, sum_click, activity_type))
+click_df_2013j_aaa <- subset(click_df,
+                             code_module %in% "AAA" & code_presentation %in% "2013J",
+                             select = c(id_student, date, sum_click, activity_type))
 ```
 
+Now that we have a data frame of our selected class and semester, we will then have to create a data frame of the average number of clicks that each individual student accessed for each kind of resource. 
+```{r}
+
+activity_type_sum_click_2013j_aaa <- click_df_2013j_aaa %>% dplyr::group_by(id_student, activity_type) %>% dplyr::summarise(mean(sum_click))
+```
+
+Now we need to spread the data frame so that each activity type is a new feture in the data frame. 
+
+```{r}
+spread_activity_type_avg_click_2013j_aaa <- tidyr::spread(activity_type_sum_click_2013j_aaa,
+                                                          activity_type,
+                                                          'mean(sum_click)')
+```
+Now we need to extract the student class result (the label) from the data set.
+```{r}
+
+std_info_df_aaa_2013 <- subset(std_info_df, code_module %in% "AAA" & code_presentation %in% "2013J", select= c(id_student, final_result))
+```
+Merge the final result label with our click data frame.
+
+```{r}
+df <- merge(spread_activity_type_avg_click_2013j_aaa, std_info_df_aaa_2013, by ="id_student")
+```
+Now we just need to replace missing values "NA" with "0".
+
+```{r}
+df <- na.replace(df, 0)
+
+```
+
+Confirm that all NA values have been replaced
+```{r}
+apply(df,2,function(x) sum(is.na(x)))
+
+```
+
+Export and save the DF
+
+```{r}
+write.csv(df, file = "2013_AAA_Data_for_Tree.csv")
+```
 
