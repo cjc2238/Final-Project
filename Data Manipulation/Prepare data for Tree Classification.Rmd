@@ -1,0 +1,39 @@
+---
+title: "Prep Data For Deciscion Tree"
+author: "C"
+date: "November 15, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load the required libraries for the analaysis 
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(party)
+```
+
+Load the orrigioal source files, in this case they are located within another directory on my PC.
+
+```{r cars}
+source('~/GitHub/Final-Project/Data Manipulation/Load Data Frames from CSV Files.R', echo=TRUE)
+```
+
+We need to combine the data frames in order to process and extract the relevant click data. We need to take note that there are 7 differenct courses, each taught 4 seperate times. In order to build this deciscion tree we will first select one course and one semester, train and test this model using split validation, then use this trained model to score the 3 other iterations of the same course. The final results will be analysed and compared. 
+```{r}
+click_df <- merge(std_vle_df, vle_df, by= c("id_site","code_presentation","code_module"))
+```
+
+Now that we've created a DF with all the click data, we must now select a specific course and specific term in which this course was presented. In this instance we will look at the course labeled "AAA" and presented during the 2013J term.  We will also only select the relevant columns in this data frame (id_student, date, sum_click, activity_type). 
+
+```{r}
+click_df_2013j_aaa <- subset(click_df, code_module %in% "AAA" & code_presentation %in% "2013J", select = c(id_student, date, sum_click, activity_type))
+```
+
+
