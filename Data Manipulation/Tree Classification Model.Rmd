@@ -38,7 +38,7 @@ Build the decision tree
 
 ```{r}
 
-aaa_2013j_tree <- ctree(final_result ~ dataplus + forumng + glossary + homepage + oucollaborate + oucontent + resource + subpage + url, data=df.train)
+tree <- ctree(final_result ~ dataplus + forumng + glossary + homepage + oucollaborate + oucontent + resource + subpage + url, data=df.train)
 
 ```
 
@@ -46,14 +46,14 @@ Plot the tree
 
 ```{r}
 
-plot(aaa_2013j_tree)
+plot(tree)
 
 ```
 
 Test the deciscion tree
 
 ```{r}
-df.test$prediction <- predict(aaa_2013j_tree, df.test)
+df.test$prediction <- predict(tree, df.test)
 
 ```
 
