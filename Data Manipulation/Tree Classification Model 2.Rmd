@@ -1,0 +1,70 @@
+---
+title: "Create Tree Model"
+author: "C"
+date: "November 16, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load Libraries
+```{r}
+library(ggplot2)
+library(party)
+library(rpart)
+```
+
+Load Data frame 
+
+```{r}
+df2 <- read.csv("AAA_SUM_Data_for_Tree.csv")
+
+```
+
+Split the data into a training set and test set (75% of data to training and 25 % of training to Test).
+
+```{r}
+n = nrow(df2)
+train = sample(1:n, size = round(0.75*n), replace=FALSE)
+df2.train = df2[train,]
+df2.test = df2[-train,]
+```
+
+
+Build the decision tree
+
+```{r}
+
+tree2 <- ctree(factor(final_result) ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data=df2.train)
+
+```
+
+Plot the tree
+
+```{r}
+
+plot(tree2)
+
+```
+
+Test the deciscion tree
+
+```{r}
+df2.test$prediction <- predict(tree2, df2.test)
+
+```
+
+
+```{r}
+c2.tree2 <- rpart(prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data=df2.test) 
+printcp(c2.tree2)
+rpart(formula = prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data = df2.test, method = "class")
+```
+
+
+
+

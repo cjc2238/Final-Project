@@ -15,22 +15,30 @@ Load Libraries
 ```{r}
 library(ggplot2)
 library(party)
+library(rpart)
 ```
 
 Load Data frame 
 
 ```{r}
-df <- read.csv("2013_AAA_Data_for_Tree.csv")
+df1 <- read.csv("AAA_Data_for_Tree.csv")
 
+```
+
+Remove X Variable
+
+```{r}
+
+df1 <- df1[,-1]
 ```
 
 Split the data into a training set and test set (75% of data to training and 25 % of training to Test).
 
 ```{r}
-n = nrow(df)
+n = nrow(df1)
 train = sample(1:n, size = round(0.75*n), replace=FALSE)
-df.train = df[train,]
-df.test = df[-train,]
+df1.train = df1[train,]
+df1.test = df1[-train,]
 ```
 
 
@@ -38,7 +46,7 @@ Build the decision tree
 
 ```{r}
 
-tree <- ctree(final_result ~ dataplus + forumng + glossary + homepage + oucollaborate + oucontent + resource + subpage + url, data=df.train)
+tree <- ctree(factor(final_result) ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data=df1.train)
 
 ```
 
@@ -53,9 +61,20 @@ plot(tree)
 Test the deciscion tree
 
 ```{r}
-df.test$prediction <- predict(tree, df.test)
+df1.test$prediction <- predict(tree, df1.test)
 
 ```
 
+```{r}
+c2.tree <- rpart(prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data=df1.test) 
+printcp(c2.tree)
+rpart(formula = prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url, data = df1.test, method = "class")
+```
 
+Check performance of the model using a confusion matrix
+
+```{r}
+table(df1.test$final_result, df1.test$prediction)
+
+```
 
