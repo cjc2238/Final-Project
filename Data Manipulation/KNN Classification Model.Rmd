@@ -82,7 +82,7 @@ df1_KNN_test_target <- df1_KNN[553:735, 11]
 
 Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
 ```{r}
-m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=27)
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=7)
 
 ```
 
@@ -90,6 +90,17 @@ build a confusion matrix to check the performance of the model
 
 ```{r}
 table(df1_KNN_test_target, m1)
+
+```
+
+Visulaize results 
+
+```{r}
+knn_confusion <- as.data.frame(table(df1_KNN_test_target, m1))
+
+knn_plot <- ggplot(knn_confusion)
+
+knn_plot + geom_tile(aes(x=df1_KNN_test_target, y=m1, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(breaks=seq(from=-0, to=110, by=15), high = "blue") + labs(fill="Frequency") + geom_text(data = knn_confusion, aes(x=df1_KNN_test_target, y=m1, label=Freq), color = "white")
 
 ```
 
