@@ -1,0 +1,108 @@
+---
+title: "KNN Classification Model with Binary Label"
+author: "C"
+date: "November 18, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load Libraries
+```{r}
+library(ggplot2)
+library(rpart)
+library(class)
+```
+Load Data frame 
+
+
+```{r}
+df1 <- read.csv("AAA_Data_for_Tree.csv")
+
+```
+
+Remove X variable
+
+```{r}
+df1 <- df1[,-c(1,3)]
+
+```
+
+Set seed
+
+```{r}
+set.seed(9850)
+
+```
+
+Generate random number to randomize data set
+
+```{r}
+gp <- runif(nrow(df1))
+
+```
+
+Mix the rows using the random number as the order
+
+```{r}
+
+df1_KNN <- df1[order(gp),]
+
+```
+
+create function to rescale/normalze the numeric features using max/min
+
+```{r}
+normalize <- function(x){
+  return( (x - min(x)) / (max(x) - min(x)))}
+
+```
+
+Create new normalized data frame
+
+```{r}
+
+df1_KNN_n <- as.data.frame(lapply(df1_KNN[,c(2,3,4,5,6,7,8,9,10)], normalize))
+
+```
+
+Create training and test set and also create training and test targets. Use a .75 split ratio based on total number of observations (735 * .75 = 551 OR rows 1:552 for training set and rows 553:735 for test set.
+
+```{r}
+df1_KNN_train <- df1_KNN_n[1:552, ]
+df1_KNN_test <- df1_KNN_n[553:735, ]
+df1_KNN_train_target <- df1_KNN[1:552, 12]
+df1_KNN_test_target <- df1_KNN[553:735, 12]
+
+```
+
+Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
+```{r}
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11)
+
+```
+
+build a confusion matrix to check the performance of the model
+
+```{r}
+table(df1_KNN_test_target, m1)
+
+```
+
+Visulaize results 
+
+```{r}
+knn_confusion <- as.data.frame(table(df1_KNN_test_target, m1))
+
+knn_plot <- ggplot(knn_confusion)
+
+knn_plot + geom_tile(aes(x=df1_KNN_test_target, y=m1, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(high = "red") + labs(fill="Frequency", title = "KNN Confusion Matrix") + geom_text(data = knn_confusion, aes(x=df1_KNN_test_target, y=m1, label=Freq), color = "white")
+
+```
+
+
+
