@@ -82,7 +82,7 @@ df1_KNN_test_target <- df1_KNN[553:735, 11]
 
 Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
 ```{r}
-m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=7)
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11)
 
 ```
 
