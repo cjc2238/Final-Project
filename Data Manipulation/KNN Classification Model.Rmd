@@ -17,6 +17,13 @@ library(ggplot2)
 library(rpart)
 library(class)
 ```
+
+Set working directory 
+```{r}
+setwd("~/GitHub/Final-Project/Data Manipulation")
+```
+
+
 Load Data frame 
 
 
