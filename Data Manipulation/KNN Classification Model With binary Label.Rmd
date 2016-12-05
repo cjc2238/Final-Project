@@ -17,6 +17,7 @@ library(ggplot2)
 library(rpart)
 library(class)
 library(ROCR)
+library(caret)
 ```
 Load Data frame 
 
@@ -83,15 +84,14 @@ df1_KNN_test_target <- df1_KNN[553:735, 12]
 
 Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
 ```{r}
-m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11, prob = TRUE)
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=27, prob = TRUE)
 
 ```
 
 build a confusion matrix to check the performance of the model
 
 ```{r}
-table(df1_KNN_test_target, m1)
-
+confusionMatrix(m1, df1_KNN_test_target)
 ```
 
 Visulaize results 
@@ -126,7 +126,7 @@ pred_knn <- performance(pred_knn, "tpr", "fpr")
 ```
 plot ROC
 ```{r}
-plot(pred_knn, avg= "threshold", colorize=T, lwd=3, main="KNN Binary Label ROC Curve")
+KNN_ROC <- plot(pred_knn, avg= "threshold", colorize=T, lwd=3, main="KNN Binary Label ROC Curve")
 ```
 
 

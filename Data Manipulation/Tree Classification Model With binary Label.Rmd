@@ -16,6 +16,8 @@ Load Libraries
 library(ggplot2)
 library(party)
 library(rpart)
+library(ROCR)
+library(caret)
 ```
 
 Load Data frame 
@@ -74,7 +76,7 @@ rpart(formula = prediction ~ homepage + forumng + glossary + dataplus + oucollab
 Check performance of the model using a confusion matrix
 
 ```{r}
-table(df1.test$binary_label, df1.test$prediction)
+confusionMatrix(df1.test$prediction, df1.test$binary_label)
 
 ```
 
@@ -88,3 +90,6 @@ tree_plot <- ggplot(tree_confusion)
 tree_plot + geom_tile(aes(x=Var1, y=Var2, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(high = "red") + labs(fill="Frequency", title = "Decision Tree Confusion Matrix") + geom_text(data = tree_confusion, aes(x=Var1, y=Var2, label=Freq), color = "white")
 
 ```
+visualize the performance of the model with an ROC curve using probabilies of predictions.
+
+
