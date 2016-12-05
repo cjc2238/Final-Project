@@ -92,4 +92,14 @@ tree_plot + geom_tile(aes(x=Var1, y=Var2, fill=Freq), color = "gray") + scale_x_
 ```
 visualize the performance of the model with an ROC curve using probabilies of predictions.
 
+```{r}
+pred <- predict(tree, newdata=df1.test)
+probs <- treeresponse(tree, newdata=df1.test)
+pred <- do.call(rbind, probs)
+summary(pred)
+roc_pred <- prediction(pred[,1], df1.test$binary_label)
+TREE_ROC <- plot(performance(roc_pred, measure="tpr", x.measure="fpr"), colorize=TRUE, main="Tree Binary Label ROC Curve", lwd=3, avg= "threshold")
+```
+
+
 
