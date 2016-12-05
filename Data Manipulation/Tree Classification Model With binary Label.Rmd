@@ -33,6 +33,28 @@ Remove X Variable
 
 df1 <- df1[,-1]
 ```
+set seed 
+
+```{r}
+set.seed(9850)
+
+```
+
+Generate random number to randomize data set
+
+```{r}
+gp <- runif(nrow(df1))
+
+```
+
+Mix the rows using the random number as the order
+
+```{r}
+
+df1 <- df1[order(gp),]
+
+```
+
 
 Split the data into a training set and test set (75% of data to training and 25 % of training to Test).
 
@@ -42,7 +64,6 @@ train = sample(1:n, size = round(0.75*n), replace=FALSE)
 df1.train = df1[train,]
 df1.test = df1[-train,]
 ```
-
 
 Build the decision tree
 

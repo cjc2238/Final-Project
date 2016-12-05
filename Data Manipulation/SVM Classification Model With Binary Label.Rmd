@@ -1,0 +1,133 @@
+---
+title: "SVM Classification Model With Binary Label"
+author: "C"
+date: "December 5, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load Libraries
+```{r}
+library(ggplot2)
+library(kernlab)
+library(rpart)
+library(ROCR)
+library(caret)
+```
+
+Load Data frame and change the formate of the target label to r name format
+
+```{r}
+df1 <- read.csv("AAA_Data_for_Tree.csv")
+df1$binary_label <- as.character(df1$binary_label)
+df1$binary_label[df1$binary_label == " Monitor"] <- "monitor"
+df1$binary_label[df1$binary_label == "Don't Monitor"] <- "ignore"
+df1$binary_label <- as.factor(df1$binary_label)
+
+```
+
+Remove X Variable
+
+```{r}
+
+df1 <- df1[,-1]
+```
+
+Generate random number to randomize data set
+
+```{r}
+gp <- runif(nrow(df1))
+
+```
+
+Mix the rows using the random number as the order
+
+```{r}
+
+df1 <- df1[order(gp),]
+
+```
+
+
+First, we set up for an analysis, loading the segmentation data set from the caret package and using the caret's createDataPartition() function to produce training and test data sets. Load the data and construct indices to divide it into training and test data sets.
+
+```{r}
+trainIndex <- createDataPartition(df1$binary_label,p=.5,list=FALSE)
+trainData <- df1[trainIndex,]
+testData  <- df1[-trainIndex,]
+trainX <-trainData[,c(3:11)]        # Pull out the variables for training
+sapply(trainX,summary)           # Look at a summary of the training data
+```
+Next, we carry out a two pass training and tuning process. In the first pass, shown in the code block below, we arbitrarily pick some tuning parameters and use the default caret settings for others. In the trainControl() function we specify 5 repetitions of 10 fold cross validation. in the train() function which actually does the work, we specify the radial kernel using the method parameter and the ROC as the metric for assessing performance. The tuneLength parameter is set to pick 9 arbitrary values for the C, the "cost" of the radial kernel. This parameter controls the complexity of the boundary between support vectors. The radial kernel also requires setting a smoothing parameter, sigma. In this first, pass we let train() use its default method of calculating an analytically derived estimate for sigma. Also note that we instruct train() to center and scale the data before running the analysis with the preProc parameter.
+
+
+Setup for cross validation
+
+```{r}
+set.seed(9850)
+ctrl <- trainControl(method="repeatedcv",   # 10fold cross validation
+                     repeats=5,		    # do 5 repititions of cv
+                     summaryFunction=twoClassSummary,	# Use AUC to pick the best model
+                     classProbs=TRUE)
+```
+Train and Tune the SVM
+
+```{r}
+svm.tune <- train(x=trainX,
+                  y= trainData$binary_label,
+                  method = "svmRadial",   # Radial kernel
+                  tuneLength = 9,					# 9 values of the cost function
+                  preProc = c("center","scale"),  # Center and scale data
+                  metric="ROC",
+                  trControl=ctrl)
+svm.tune
+```
+
+The results show that the best model resulted from setting.
+
+ 
+ C      ROC        Sens       Spec      
+   0.25  0.7082947  0.9466382  0.21945455
+   0.50  0.7073253  0.9466097  0.20945455
+   1.00  0.7055522  0.9407123  0.19981818
+   2.00  0.6958099  0.9474074  0.19072727
+   4.00  0.6823274  0.9586610  0.14709091
+   8.00  0.6679479  0.9662108  0.09872727
+  16.00  0.6533007  0.9766667  0.08127273
+  32.00  0.6326312  0.9826781  0.04327273
+  64.00  0.6087397  0.9872365  0.01963636
+
+Tuning parameter 'sigma' was held constant at a value of 0.192477
+ROC was used to select the optimal model using  the largest value.
+The final values used for the model were sigma = 0.192477 and C = 0.25. 
+
+In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = 0.25 and sigma = 0.192477 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
+
+```{r}
+# Second pass
+# Look at the results of svm.tune and refine the parameter space
+ 
+set.seed(9850)
+# Use the expand.grid to specify the search space	
+grid <- expand.grid(sigma = c(.15, .2, 0.25),
+                    C = c(0.01, 0.10, .25, .35, .50)
+)
+ 
+#Train and Tune the SVM
+svm.tune <- train(x=trainX,
+                    y= trainData$binary_label,
+                    method = "svmRadial",
+                    preProc = c("center","scale"),
+                    metric="ROC",
+                    tuneGrid = grid,
+                    trControl=ctrl)
+ 
+svm.tune
+
+```
+
