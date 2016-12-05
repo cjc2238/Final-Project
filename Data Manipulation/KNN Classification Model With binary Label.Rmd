@@ -16,6 +16,7 @@ Load Libraries
 library(ggplot2)
 library(rpart)
 library(class)
+library(ROCR)
 ```
 Load Data frame 
 
@@ -82,7 +83,7 @@ df1_KNN_test_target <- df1_KNN[553:735, 12]
 
 Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
 ```{r}
-m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11)
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11, prob = TRUE)
 
 ```
 
@@ -103,6 +104,29 @@ knn_plot <- ggplot(knn_confusion)
 knn_plot + geom_tile(aes(x=df1_KNN_test_target, y=m1, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(high = "red") + labs(fill="Frequency", title = "KNN Confusion Matrix") + geom_text(data = knn_confusion, aes(x=df1_KNN_test_target, y=m1, label=Freq), color = "white")
 
 ```
+visualize the performance of the model with an ROC curve using probabilies of predictions.
 
+```{r}
+knn_prob <- attr(m1, "prob")
+
+```
+The probabilitities come on a form that ROCR does not accept so we need to invert them for the -1 class and rescale them.
+
+```{r}
+prob <- 2*ifelse(m1 == "-1", 1-knn_prob, knn_prob) - 1
+```
+Feed the "probabilities" into the ROCR package's functions and obtain a ROC curve.
+
+```{r}
+pred_knn <- prediction(knn_prob, df1_KNN_test_target)
+```
+calculate model performance
+```{r}
+pred_knn <- performance(pred_knn, "tpr", "fpr")
+```
+plot ROC
+```{r}
+plot(pred_knn, avg= "threshold", colorize=T, lwd=3, main="KNN Binary Label ROC Curve")
+```
 
 
