@@ -1,0 +1,106 @@
+---
+title: "Model Results"
+author: "C"
+date: "December 6, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#########################
+## Tree Classification ##
+#########################
+```
+
+Confusion Matrix and Statistics
+
+               Reference
+Prediction       Monitor Don't Monitor
+   Monitor            23            26
+  Don't Monitor       22           113
+                                         
+               Accuracy : 0.7391         
+                 95% CI : (0.6694, 0.801)
+    No Information Rate : 0.7554         
+    P-Value [Acc > NIR] : 0.7289         
+                                         
+                  Kappa : 0.3146         
+ Mcnemar's Test P-Value : 0.6650         
+                                         
+            Sensitivity : 0.5111         
+            Specificity : 0.8129         
+         Pos Pred Value : 0.4694         
+         Neg Pred Value : 0.8370         
+             Prevalence : 0.2446         
+         Detection Rate : 0.1250         
+   Detection Prevalence : 0.2663         
+      Balanced Accuracy : 0.6620         
+                                         
+       'Positive' Class :  Monitor       
+       
+       
+       
+```{r}
+########################
+## SVM Classification ##
+########################
+```
+Confusion Matrix and Statistics
+
+          Reference
+Prediction ignore monitor
+   ignore     125      38
+   monitor      7      13
+                                          
+               Accuracy : 0.7541          
+                 95% CI : (0.6851, 0.8146)
+    No Information Rate : 0.7213          
+    P-Value [Acc > NIR] : 0.1828          
+                                          
+                  Kappa : 0.2482          
+ Mcnemar's Test P-Value : 7.744e-06       
+                                          
+            Sensitivity : 0.9470          
+            Specificity : 0.2549          
+         Pos Pred Value : 0.7669          
+         Neg Pred Value : 0.6500          
+             Prevalence : 0.7213          
+         Detection Rate : 0.6831          
+   Detection Prevalence : 0.8907          
+      Balanced Accuracy : 0.6009          
+                                          
+       'Positive' Class : ignore          
+       
+```{r}
+########################
+## KNN Classification ##
+########################
+```
+Confusion Matrix and Statistics
+
+               Reference
+Prediction       Monitor Don't Monitor
+   Monitor            11             4
+  Don't Monitor       37           131
+                                          
+               Accuracy : 0.776           
+                 95% CI : (0.7086, 0.8342)
+    No Information Rate : 0.7377          
+    P-Value [Acc > NIR] : 0.1367          
+                                          
+                  Kappa : 0.2563          
+ Mcnemar's Test P-Value : 5.806e-07       
+                                          
+            Sensitivity : 0.22917         
+            Specificity : 0.97037         
+         Pos Pred Value : 0.73333         
+         Neg Pred Value : 0.77976         
+             Prevalence : 0.26230         
+         Detection Rate : 0.06011         
+   Detection Prevalence : 0.08197         
+      Balanced Accuracy : 0.59977         
+                                          
+       'Positive' Class :  Monitor        
