@@ -18,12 +18,13 @@ library(rpart)
 library(class)
 library(ROCR)
 library(caret)
+setwd("~/GitHub/Final-Project/Three Models with Only Click Data Features [Binary Label]")
 ```
 Load Data frame 
 
 
 ```{r}
-df1 <- read.csv("AAA_Data_for_Tree.csv")
+df1 <- read.csv("AAA_Data_Binary_Label.csv")
 
 ```
 
