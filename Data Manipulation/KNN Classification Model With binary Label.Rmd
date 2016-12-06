@@ -110,7 +110,7 @@ visualize the performance of the model with an ROC curve using probabilies of pr
 knn_prob <- attr(m1, "prob")
 
 ```
-The probabilitities come on a form that ROCR does not accept so we need to invert them for the -1 class and rescale them.
+The probabilitities come in a form that ROCR does not accept so we need to invert them for the -1 class and rescale them.
 
 ```{r}
 prob <- 2*ifelse(m1 == "-1", 1-knn_prob, knn_prob) - 1
