@@ -8,6 +8,11 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+Here we are comparing three seperate models that are trained using the same data set. The data set consists of click data from a VLE and a binary label of the over all student course outcome. As you can see, based on just using the interactiond ata as a predictor, the best KAPPA is .31 using the deciscion tree algorithm.
+
+The next step is to introduce additional student features in an attempt to increase model accuracy using this same proccesses and algorithms.
+
+
 
 ```{r}
 #########################
