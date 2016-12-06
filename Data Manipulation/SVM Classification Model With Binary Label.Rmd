@@ -61,7 +61,7 @@ First, we set up for an analysis, loading the segmentation data set from the car
 trainIndex <- createDataPartition(df1$binary_label,p=.75,list=FALSE)
 trainData <- df1[trainIndex,]
 testData  <- df1[-trainIndex,]
-trainX <-trainData[,c(7:11)]        # Pull out the variables for training
+trainX <-trainData[,-10]        # Pull out the variables for training
 sapply(trainX,summary)           # Look at a summary of the training data
 ```
 Next, we carry out a two pass training and tuning process. In the first pass, shown in the code block below, we arbitrarily pick some tuning parameters and use the default caret settings for others. In the trainControl() function we specify 5 repetitions of 10 fold cross validation. in the train() function which actually does the work, we specify the radial kernel using the method parameter and the ROC as the metric for assessing performance. The tuneLength parameter is set to pick 9 arbitrary values for the C, the "cost" of the radial kernel. This parameter controls the complexity of the boundary between support vectors. The radial kernel also requires setting a smoothing parameter, sigma. In this first, pass we let train() use its default method of calculating an analytically derived estimate for sigma. Also note that we instruct train() to center and scale the data before running the analysis with the preProc parameter.
@@ -79,35 +79,28 @@ ctrl <- trainControl(method="repeatedcv",   # 10fold cross validation
 Train and Tune the SVM
 
 ```{r}
-svm.tune <- train(x=trainX,
+set.seed(9850)
+svm.tune <- caret::train(x=trainX,
                   y= trainData$binary_label,
                   method = "svmRadial",   # Radial kernel
                   tuneLength = 9,					# 9 values of the cost function
                   preProc = c("center","scale"),  # Center and scale data
                   metric="ROC",
                   trControl=ctrl)
+ 
 svm.tune
+
+
 ```
 
 The results show that the best model resulted from setting.
 
  
- C      ROC        Sens       Spec     
-   0.25  0.7397064  0.9312051  0.2947500
-   0.50  0.7400559  0.9357436  0.2870000
-   1.00  0.7404847  0.9408590  0.2770000
-   2.00  0.7360127  0.9488974  0.2610833
-   4.00  0.7248388  0.9503462  0.2350833
-   8.00  0.7120607  0.9583718  0.2013333
-  16.00  0.6966410  0.9699359  0.1698333
-  32.00  0.6789523  0.9765000  0.1305833
-  64.00  0.6661126  0.9794744  0.1229167
-
-Tuning parameter 'sigma' was held constant at a value of 0.1750828
+Tuning parameter 'sigma' was held constant at a value of 0.1430038
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.1750828 and C = 1. 
+The final values used for the model were sigma = 0.1430038 and C = 0.5. 
 
-In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = 1 and sigma = 0.1750828 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
+In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = .5 and sigma = 0.14 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
 
 ```{r}
 # Second pass
@@ -115,8 +108,8 @@ In the second pass, having seen the parameter values selected in the first pass,
  
 set.seed(9850)
 # Use the expand.grid to specify the search space	
-grid <- expand.grid(sigma = c(.15, .17, 0.19),
-                    C = c(0.75, 0.9, 1, 1.1, 1.25)
+grid <- expand.grid(sigma = c(.0, .5, 0.1),
+                    C = c(0.01, 0.10, .15, .20, .25)
 )
  
 #Train and Tune the SVM
@@ -131,30 +124,8 @@ svm.tune <- train(x=trainX,
 svm.tune
 
 ```
-Pre-processing: centered (9), scaled (9) 
-Resampling: Cross-Validated (10 fold, repeated 5 times) 
-Summary of sample sizes: 497, 496, 498, 496, 497, 497, ... 
-Resampling results across tuning parameters:
-
-  sigma  C     ROC        Sens       Spec     
-  0.15   0.75  0.7419333  0.9393462  0.2820000
-  0.15   0.90  0.7425571  0.9342564  0.2886667
-  0.15   1.00  0.7417774  0.9317692  0.2937500
-  0.15   1.10  0.7413971  0.9327821  0.2913333
-  0.15   1.25  0.7415438  0.9403462  0.2795833
-  0.17   0.75  0.7411119  0.9418718  0.2782500
-  0.17   0.90  0.7406785  0.9393333  0.2667500
-  0.17   1.00  0.7406159  0.9358333  0.2794167
-  0.17   1.10  0.7399855  0.9363462  0.2770000
-  0.17   1.25  0.7401113  0.9398462  0.2821667
-  0.19   0.75  0.7402271  0.9412949  0.2753333
-  0.19   0.90  0.7400948  0.9383077  0.2780000
-  0.19   1.00  0.7400973  0.9408077  0.2637500
-  0.19   1.10  0.7394702  0.9383462  0.2833333
-  0.19   1.25  0.7395028  0.9438333  0.2755000
-
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.15 and C = 0.9. 
+The final values used for the model were sigma = 0.1 and C = 0.01. 
 
 ```{r}
 #Linear Kernel
@@ -184,21 +155,18 @@ Compare SVM Model kernal
 bwplot(rValues,metric="ROC",ylab =c("linear kernel", "radial kernel"))
 
 ```
-Set the tune grid for the final model fit
-```{r}
-grid <- expand.grid(sigma = c(.15, .17, 0.19),
-                    C = c(0.75, 0.9, 1, 1.1, 1.25))
-```
+
 
 Fit SVM Model 
 
 ```{r}
-svmFit <- train(x=trainX,
-    y= trainData$binary_label,
+svmFit <- train(binary_label~.,
+    data= trainData,
     method = "svmRadial",
     preProc = c("center", "scale"),
     metric="ROC",
-    tuneGrid = grid,
+    sigma = .1,
+    cost = .01,
     trControl = ctrl)
 
 
@@ -216,16 +184,13 @@ Create confusion matrix
 confusionMatrix(predictedClasses, reference = testData$binary_label)
 
 ```
-
+Calculate model performance for ROC 
 ```{r}
 pred_svm <- ROCR::prediction(predictedProbs$monitor, testData$binary_label)
-```
-calculate model performance
-```{r}
 pred_svm <- performance(pred_svm, "tpr", "fpr")
 ```
 plot ROC
 ```{r}
 SVM_ROC <- plot(pred_svm, avg= "threshold", colorize=T, lwd=3, main="SVM Binary Label ROC Curve")
 ```
-Visualize FP and TP table
+
