@@ -1,0 +1,128 @@
+---
+title: "Tree Classification Model with Binary Label"
+author: "C"
+date: "November 18, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load Libraries
+```{r}
+library(ggplot2)
+library(party)
+library(rpart)
+library(ROCR)
+library(caret)
+setwd("~/GitHub/Final-Project/Three Models with Click Data and Additional Features [Binary Label]")
+```
+
+Load Data frame 
+
+```{r}
+df1 <- read.csv("AAA_Data_Binary_Label_Additional_Features.csv")
+
+```
+
+Remove X Variable
+
+```{r}
+
+df1 <- df1[,-1]
+```
+set seed 
+
+```{r}
+set.seed(9850)
+
+```
+
+Generate random number to randomize data set
+
+```{r}
+gp <- runif(nrow(df1))
+
+```
+
+Mix the rows using the random number as the order
+
+```{r}
+
+df1 <- df1[order(gp),]
+
+```
+
+Split the data into a training set and test set (75% of data to training and 25 % of training to Test).
+
+```{r}
+n = nrow(df1)
+train = sample(1:n, size = round(0.75*n), replace=FALSE)
+df1.train = df1[train,]
+df1.test = df1[-train,]
+```
+
+Build the decision tree
+
+```{r}
+
+tree <- ctree(factor(binary_label) ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url + gender + region + highest_education + imd_band + age_band + num_of_prev_attempts + studied_credits + disability, data=df1.train)
+
+```
+
+Plot the tree
+
+```{r}
+
+plot(tree)
+
+```
+
+Test the deciscion tree
+
+```{r}
+df1.test$prediction <- predict(tree, df1.test)
+
+```
+
+```{r}
+c2.tree <- rpart(prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url + gender + region + highest_education + imd_band + age_band + num_of_prev_attempts + studied_credits + disability, data=df1.test) 
+
+printcp(c2.tree)
+
+rpart(formula = prediction ~ homepage + forumng + glossary + dataplus + oucollaborate + oucontent + resource + subpage + url + gender + region + highest_education + imd_band + age_band + num_of_prev_attempts + studied_credits + disability, data = df1.test, method = "class")
+```
+
+Check performance of the model using a confusion matrix
+
+```{r}
+confusionMatrix(df1.test$prediction, df1.test$binary_label)
+
+```
+
+Visulaize results 
+
+```{r}
+tree_confusion <- as.data.frame(table(df1.test$binary_label, df1.test$prediction))
+
+tree_plot <- ggplot(tree_confusion)
+
+tree_plot + geom_tile(aes(x=Var1, y=Var2, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(high = "red") + labs(fill="Frequency", title = "Decision Tree Confusion Matrix") + geom_text(data = tree_confusion, aes(x=Var1, y=Var2, label=Freq), color = "white")
+
+```
+visualize the performance of the model with an ROC curve using probabilies of predictions.
+
+```{r}
+pred <- predict(tree, newdata=df1.test)
+probs <- treeresponse(tree, newdata=df1.test)
+pred <- do.call(rbind, probs)
+summary(pred)
+roc_pred <- prediction(pred[,2], df1.test$binary_label)
+TREE_ROC <- plot(performance(roc_pred, measure="tpr", x.measure="fpr"), colorize=TRUE, main="Tree Binary Label ROC Curve", lwd=3, avg= "threshold")
+```
+
+
+

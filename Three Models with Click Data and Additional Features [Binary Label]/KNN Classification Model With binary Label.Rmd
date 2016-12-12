@@ -1,0 +1,140 @@
+---
+title: "KNN Classification Model with Binary Label"
+author: "C"
+date: "November 18, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Load Libraries
+```{r}
+library(ggplot2)
+library(rpart)
+library(class)
+library(ROCR)
+library(caret)
+setwd("~/GitHub/Final-Project/Three Models with Click Data and Additional Features [Binary Label]")
+```
+Load Data frame 
+
+
+```{r}
+df1 <- read.csv("AAA_Data_Binary_Label_Additional_Features.csv")
+
+```
+
+Set seed
+
+```{r}
+set.seed(9850)
+
+```
+
+Generate random number to randomize data set
+
+```{r}
+gp <- runif(nrow(df1))
+
+```
+
+Mix the rows using the random number as the order
+
+```{r}
+
+df2 <- df1[order(gp),]
+
+```
+Remove unwanted features
+
+```{r}
+df1_KNN <- df2[,-c(1,2,3,14)]
+```
+
+Convert categorical features to integers 
+```{r}
+df1_KNN$gender = as.integer(df1_KNN$gender)
+df1_KNN$region = as.integer(df1_KNN$region)
+df1_KNN$highest_education = as.integer(df1_KNN$highest_education)
+df1_KNN$imd_band = as.integer(df1_KNN$imd_band)
+df1_KNN$age_band = as.integer(df1_KNN$age_band)
+df1_KNN$disability = as.integer(df1_KNN$disability)
+
+```
+
+Replace NA Values in data frame
+
+```{r}
+df1_KNN[is.na(df1_KNN)] <- 0
+```
+
+Create data frame with label removed 
+```{r}
+
+df1_KNN_n <- df1_KNN[,-10]
+
+```
+
+
+Create training and test set and also create training and test targets. Use a .75 split ratio based on total number of observations (735 * .75 = 551 OR rows 1:552 for training set and rows 553:735 for test set.
+
+```{r}
+df1_KNN_train <- df1_KNN_n[1:552, ]
+df1_KNN_test <- df1_KNN_n[553:735, ]
+df1_KNN_train_target <- df1_KNN[1:552, 10]
+df1_KNN_test_target <- df1_KNN[553:735, 10]
+
+```
+
+Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
+```{r}
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=27, prob = TRUE)
+
+```
+
+build a confusion matrix to check the performance of the model
+
+```{r}
+confusionMatrix(m1, df1_KNN_test_target)
+```
+
+Visulaize results 
+
+```{r}
+knn_confusion <- as.data.frame(table(df1_KNN_test_target, m1))
+
+knn_plot <- ggplot(knn_confusion)
+
+knn_plot + geom_tile(aes(x=df1_KNN_test_target, y=m1, fill=Freq), color = "gray") + scale_x_discrete(name="Actual Class") + scale_y_discrete(name="Predicted Class") + scale_fill_gradient(high = "red") + labs(fill="Frequency", title = "KNN Confusion Matrix") + geom_text(data = knn_confusion, aes(x=df1_KNN_test_target, y=m1, label=Freq), color = "white")
+
+```
+visualize the performance of the model with an ROC curve using probabilies of predictions.
+
+```{r}
+knn_prob <- attr(m1, "prob")
+
+```
+The probabilitities come in a form that ROCR does not accept so we need to invert them for the -1 class and rescale them.
+
+```{r}
+prob <- 2*ifelse(m1 == "-1", 1-knn_prob, knn_prob) - 1
+```
+Feed the "probabilities" into the ROCR package's functions and obtain a ROC curve.
+
+```{r}
+pred_knn <- prediction(knn_prob, df1_KNN_test_target)
+```
+calculate model performance
+```{r}
+pred_knn <- performance(pred_knn, "tpr", "fpr")
+```
+plot ROC
+```{r}
+KNN_ROC <- plot(pred_knn, avg= "threshold", colorize=T, lwd=3, main="KNN Binary Label ROC Curve")
+```
+
+
