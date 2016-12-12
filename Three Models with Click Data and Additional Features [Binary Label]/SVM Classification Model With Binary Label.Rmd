@@ -18,13 +18,13 @@ library(kernlab)
 library(rpart)
 library(ROCR)
 library(caret)
-setwd("~/GitHub/Final-Project/Three Models with Only Click Data Features [Binary Label]")
+setwd("~/GitHub/Final-Project/Three Models with Click Data and Additional Features [Binary Label]")
 ```
 
 Load Data frame and change the formate of the target label to r name format
 
 ```{r}
-df1 <- read.csv("AAA_Data_Binary_Label.csv")
+df1 <- read.csv("AAA_Data_Binary_Label_Additional_Features.csv")
 df1$binary_label <- as.character(df1$binary_label)
 df1$binary_label[df1$binary_label == " Monitor"] <- "monitor"
 df1$binary_label[df1$binary_label == "Don't Monitor"] <- "ignore"
@@ -32,13 +32,11 @@ df1$binary_label <- as.factor(df1$binary_label)
 
 ```
 
-Remove X Variable
+Remove unwanted features
 
 ```{r}
-
-df1 <- df1[,-c(1,2,3,13)]
+df1 <- df1[,-c(1,2,3,14)]
 ```
-
 Generate random number to randomize data set
 
 ```{r}
@@ -54,6 +52,21 @@ df1 <- df1[order(gp),]
 
 ```
 
+Convert categorical features to integers 
+```{r}
+df1$gender = as.integer(df1$gender)
+df1$region = as.integer(df1$region)
+df1$highest_education = as.integer(df1$highest_education)
+df1$imd_band = as.integer(df1$imd_band)
+df1$age_band = as.integer(df1$age_band)
+df1$disability = as.integer(df1$disability)
+
+```
+Replace NA Values in data frame
+
+```{r}
+df1[is.na(df1)] <- 0
+```
 
 First, we set up for an analysis, loading the segmentation data set from the caret package and using the caret's createDataPartition() function to produce training and test data sets. Load the data and construct indices to divide it into training and test data sets.
 
@@ -96,11 +109,11 @@ svm.tune
 The results show that the best model resulted from setting.
 
  
-Tuning parameter 'sigma' was held constant at a value of 0.1430038
+Tuning parameter 'sigma' was held constant at a value of 0.04643235
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.1430038 and C = 0.5. 
+The final values used for the model were sigma = 0.04643235 and C = 0.5.  
 
-In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = .5 and sigma = 0.14 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
+In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = .5 and sigma = 0.04 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
 
 ```{r}
 # Second pass
@@ -108,8 +121,8 @@ In the second pass, having seen the parameter values selected in the first pass,
  
 set.seed(9850)
 # Use the expand.grid to specify the search space	
-grid <- expand.grid(sigma = c(.0, .5, 0.1),
-                    C = c(0.01, 0.10, .15, .20, .25)
+grid <- expand.grid(sigma = c(.0, .04, 0.08),
+                    C = c(0.1, 0.25, .5, .75, 1)
 )
  
 #Train and Tune the SVM
@@ -125,7 +138,7 @@ svm.tune
 
 ```
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.1 and C = 0.01. 
+The final values used for the model were sigma = 0.04 and C = 0.75. 
 
 ```{r}
 #Linear Kernel
@@ -165,8 +178,8 @@ svmFit <- train(binary_label~.,
     method = "svmRadial",
     preProc = c("center", "scale"),
     metric="ROC",
-    sigma = .1,
-    cost = .01,
+    sigma = .04,
+    cost = .75,
     trControl = ctrl)
 
 
