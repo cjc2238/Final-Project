@@ -125,9 +125,22 @@ calculate model performance
 ```{r}
 pred_knn <- performance(pred_knn, "tpr", "fpr")
 ```
-plot ROC
-```{r}
-KNN_ROC <- plot(pred_knn, avg= "threshold", colorize=T, lwd=3, main="KNN Binary Label ROC Curve")
-```
+Calculate AUC
 
+```{r}
+area <- auc(df1_KNN_test_target, knn_prob)
+```
+plot ROC
+
+```{r}
+rocplot <- function(knn_prob, df1_KNN_test_target, ...) {
+  predob = prediction(knn_prob, df1_KNN_test_target)
+  perf = performance(predob, "tpr", "fpr")
+  plot(perf, ...)
+  area <- format(round(area, 4), nsmall = 4)
+  text(x=0.8, y=0.1, labels = paste("AUC =", area))
+    segments(x0=0, y0=0, x1=1, y1=1, col="black", lty=2)
+}
+rocplot(knn_prob, df1_KNN_test_target, col="black", avg= "threshold", lwd=2, main="KNN Binary Label ROC Curve")
+```
 
