@@ -18,6 +18,7 @@ library(kernlab)
 library(rpart)
 library(ROCR)
 library(caret)
+library(pROC)
 setwd("~/GitHub/Final-Project/Three Models with Only Click Data Features [Binary Label]")
 ```
 
@@ -98,7 +99,7 @@ The results show that the best model resulted from setting.
  
 Tuning parameter 'sigma' was held constant at a value of 0.1430038
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.1430038 and C = 0.5. 
+The final values used for the model were sigma = 0.1440011 and C = 0.25. 
 
 In the second pass, having seen the parameter values selected in the first pass, we use train()'s tuneGrid parameter to do some sensitivity analysis around the values C = .5 and sigma = 0.14 that produced the model with the best ROC value. Note that R's expand.grid() function is used to build a dataframe contain all the combinations of C and sigma we want to look at.
 
@@ -108,8 +109,8 @@ In the second pass, having seen the parameter values selected in the first pass,
  
 set.seed(9850)
 # Use the expand.grid to specify the search space	
-grid <- expand.grid(sigma = c(.0, .5, 0.1),
-                    C = c(0.01, 0.10, .15, .20, .25)
+grid <- expand.grid(sigma = c(.0, .15, 0.30),
+                    C = c(0.01, 0.10, .25, .35, .50)
 )
  
 #Train and Tune the SVM
@@ -125,7 +126,7 @@ svm.tune
 
 ```
 ROC was used to select the optimal model using  the largest value.
-The final values used for the model were sigma = 0.1 and C = 0.01. 
+The final values used for the model were sigma = 0.15 and C = 0.01. 
 
 ```{r}
 #Linear Kernel
@@ -142,7 +143,7 @@ svm.tune2 <- train(x=trainX,
  
 svm.tune2
 ```
-The following block of code and results shows just thee first five lines of the comparison table but includes the summary of the comparison.
+The following block of code and results shows just the first five lines of the comparison table but includes the summary of the comparison.
 
 ```{r}
 rValues <- resamples(list(svm=svm.tune,svm.tune2))
@@ -165,7 +166,7 @@ svmFit <- train(binary_label~.,
     method = "svmRadial",
     preProc = c("center", "scale"),
     metric="ROC",
-    sigma = .1,
+    sigma = .15,
     cost = .01,
     trControl = ctrl)
 
@@ -190,14 +191,26 @@ pred_svm <- ROCR::prediction(predictedProbs$monitor, testData$binary_label)
 pred_svm <- performance(pred_svm, "tpr", "fpr")
 ```
 Calcualte AUC
+
+
 ```{r}
-svm_area <- auc(testData$predictedClasses, prob)
+pred <- predictedProbs[,2]
+area <- auc(testData$binary_label, pred)
 
 ```
-
 
 plot ROC
+
 ```{r}
-SVM_ROC <- plot(pred_svm, avg= "threshold", colorize=T, lwd=3, main="Support Vector Machine ROC Curve")
+rocplot <- function(pred, testData, ...) {
+  predob = prediction(pred, testData$binary_label)
+  perf = performance(predob, "tpr", "fpr")
+  plot(perf, ...)
+  area <- format(round(area, 4), nsmall = 4)
+  text(x=0.8, y=0.1, labels = paste("AUC =", area))
+    segments(x0=0, y0=0, x1=1, y1=1, col="black", lty=2)
+}
+rocplot(pred, testData, col="black", avg= "threshold", lwd=2, main="Support Vector Machine ROC Curve")
 ```
+
 
