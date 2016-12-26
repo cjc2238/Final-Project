@@ -18,6 +18,7 @@ library(rpart)
 library(class)
 library(ROCR)
 library(caret)
+library(pROC)
 setwd("~/GitHub/Final-Project/Three Models with Only Click Data Features [Binary Label]")
 ```
 Load Data frame 
