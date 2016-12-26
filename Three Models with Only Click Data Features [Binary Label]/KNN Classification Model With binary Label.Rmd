@@ -142,6 +142,6 @@ rocplot <- function(knn_prob, df1_KNN_test_target, ...) {
   text(x=0.8, y=0.1, labels = paste("AUC =", area))
     segments(x0=0, y0=0, x1=1, y1=1, col="black", lty=2)
 }
-rocplot(knn_prob, df1_KNN_test_target, col="black", avg= "threshold", lwd=2, main="KNN Click Data ROC Curve")
+rocplot(knn_prob, df1_KNN_test_target, col="black", avg= "threshold", lwd=2, main="k-Nearest Neighbors ROC Curve")
 ```
 

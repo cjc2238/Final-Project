@@ -189,8 +189,15 @@ Calculate model performance for ROC
 pred_svm <- ROCR::prediction(predictedProbs$monitor, testData$binary_label)
 pred_svm <- performance(pred_svm, "tpr", "fpr")
 ```
+Calcualte AUC
+```{r}
+svm_area <- auc(testData$predictedClasses, prob)
+
+```
+
+
 plot ROC
 ```{r}
-SVM_ROC <- plot(pred_svm, avg= "threshold", colorize=T, lwd=3, main="SVM Binary Label ROC Curve")
+SVM_ROC <- plot(pred_svm, avg= "threshold", colorize=T, lwd=3, main="Support Vector Machine ROC Curve")
 ```
 
