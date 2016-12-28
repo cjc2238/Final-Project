@@ -84,9 +84,9 @@ df1_KNN_test_target <- df1_KNN[553:735, 12]
 
 ```
 
-Calcualte the K value using the sqrt of the total number of observations sqrt(735) = 27.11088 and build the model using the knn function and training data.
+Calcualte the K value using cross-validated hyper perameter tuning script. 
 ```{r}
-m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=27, prob = TRUE)
+m1 <- knn(train = df1_KNN_train, test = df1_KNN_test, cl = df1_KNN_train_target, k=11, prob = TRUE)
 
 ```
 
@@ -143,5 +143,6 @@ rocplot <- function(knn_prob, df1_KNN_test_target, ...) {
     segments(x0=0, y0=0, x1=1, y1=1, col="black", lty=2)
 }
 rocplot(knn_prob, df1_KNN_test_target, col="black", avg= "threshold", lwd=2, main="k-Nearest Neighbors ROC Curve")
+
 ```
 
